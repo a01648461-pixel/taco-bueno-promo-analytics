@@ -1,0 +1,18 @@
+# Lakeflow Declarative Pipeline: bronze -> silver -> gold
+resources:
+  pipelines:
+    taco_bueno_sales_pipeline:
+      name: taco_bueno_sales_pipeline
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      continuous: false          # triggered (batch) mode: runs when the job starts it
+      channel: CURRENT
+      configuration:
+        raw_sales_path: ${var.raw_sales_path}
+        # Only needed if auto-detection fails (see silver notebook):
+        # store_column: Store_Number
+        # date_column: Business_Date
+      libraries:
+        - glob:
+            include: ../../src/transformations/**

@@ -1,0 +1,35 @@
+# Job: runs every day, and also whenever a new sales file lands in the volume.
+resources:
+  jobs:
+    taco_bueno_daily_job:
+      name: taco_bueno_daily_job
+
+      trigger:
+        file_arrival:
+          url: ${var.raw_sales_path}
+          min_time_between_triggers_seconds: 3600
+
+      # Alternative: fixed daily schedule (use instead of file_arrival)
+      # schedule:
+      #   quartz_cron_expression: "0 0 6 * * ?"   # 6:00 AM every day
+      #   timezone_id: America/Mexico_City
+
+      max_concurrent_runs: 1
+
+      tasks:
+        - task_key: refresh_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.taco_bueno_sales_pipeline.id}
+          max_retries: 2
+          min_retry_interval_millis: 300000   # wait 5 min before retrying
+
+        - task_key: validate_outputs
+          depends_on:
+            - task_key: refresh_pipeline
+          notebook_task:
+            notebook_path: ../../src/checks/validate_outputs.sql
+          max_retries: 0                       # a failed check should alert, not retry
+
+      email_notifications:
+        on_failure:
+          - your_team_email@example.com        # replace with your email

@@ -1,0 +1,21 @@
+# Databricks Asset Bundle: lets you deploy the pipeline + job from this repo
+# with `databricks bundle deploy` (optional; you can also create them in the UI).
+bundle:
+  name: taco_bueno_promo_analytics
+
+include:
+  - resources/jobs/*.yml
+  - resources/pipelines/*.yml
+
+variables:
+  catalog:
+    default: workspace
+  schema:
+    default: taco_bueno
+  raw_sales_path:
+    default: "/Volumes/workspace/default/datos_tacobueno/Taco Bueno - Pricing/"
+
+targets:
+  dev:
+    mode: development
+    default: true
